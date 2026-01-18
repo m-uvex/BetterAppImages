@@ -1,0 +1,1 @@
+a simple tool that watches for any .AppImage files in ~/Downloads, and sets it up by moving it into a custom dir, creating a proper .desktop entry for it and giving it the proper icon
