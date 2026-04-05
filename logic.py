@@ -1,44 +1,53 @@
+#!/usr/bin/env python3
 import time
 import os
+import subprocess
 
 scanning = True
 watched_dir = os.path.expanduser('~/Downloads')
-scan_interval = 3
-max_tries = 3
+destination = os.path.expanduser('~/.local/bin/appimages')
+desktop_path = os.path.expanduser('~/.local/share/applications')
+found_files = []
 
-files = []
-tries = 0
-
-if scanning:
-    print('Scanning...\n')
-
-while scanning:
-    for filename in os.listdir(watched_dir):
-        if filename.endswith('.AppImage'):
-            filepath = os.path.join(watched_dir, filename)
-            found_file = filename
-            files.append(filename)
-            files.sort()
-
-    if files:
-        scanning = False
-        print('> Found', len(files), 'files.')
-        for i, filename in enumerate(files, 1):
-            print(f'{i}  -  {filename}')
-
-        print('\nFiles to setup (eg: 1 2 3, 1-3 or all)')
-        target = input()
+try:
+    print('Scanning...')
+    first_try = True
+    while scanning:
         
-    elif tries >= max_tries:
-        if len(files) < 1:
-            scanning = False
-            tries = 0
-            confirmation = input('No files found, rescan? [y/n] ')
-            if confirmation.lower() in ["y", "yes", ""]:
-                scanning = True
-                print('\nScanning...\n')
-            else: exit()
+        time.sleep(1)
 
-    elif tries < max_tries:
-        tries += 1
-        time.sleep(scan_interval)
+        for filename in os.listdir(watched_dir):
+            if filename.endswith('.AppImage'):
+                if filename not in found_files:
+                    found_files.append(filename)
+        found_files.sort()
+
+        if found_files:
+            scanning = False
+            print('> Found', len(found_files), 'files.')
+            for i, filename in enumerate(found_files, 1):
+                print(f'{i}  -  {filename}')
+
+            target = input('\nFile to setup? (r to rescan, ^C to exit)\n> ').strip().lower()
+
+            if target == 'r':
+                found_files = []
+                scanning = True
+                first_try = True
+            elif target == '' or target.isdigit():
+                if target == '': target = '1'
+                index = int(target) - 1
+                target_file = found_files[index]
+                target_file_path = f'{watched_dir}/{target_file}'
+                if not os.path.exists(destination): os.makedirs(destination)
+                os.rename(target_file_path, f'{destination}/{target_file}')
+                target_file_path = f'{destination}/{target_file}'
+                os.chmod(target_file_path, 0o755)
+                print(f'✓ Done: {target_file_path}')
+        else:
+            if first_try:
+                print('(^C to exit)\n')
+                first_try = False
+
+except KeyboardInterrupt:
+    print('\nExiting...')
