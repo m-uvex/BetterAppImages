@@ -77,8 +77,8 @@ try:
                     print('Moving file...  ', end='\r')
                     os.rename(target_file_path, f'{destination}/{target_file}')
                     print('Setting permissions...', end='\r')
-                    os.chmod(target_file_path, 0o755)
-                    print(f'✓ Done: {target_file_path}     ')
+                    os.chmod(f'{destination}/{target_file}', 0o755)
+                    print(f'✓ Done: ', f'{destination}/{target_file}')
 
 
 except KeyboardInterrupt:
